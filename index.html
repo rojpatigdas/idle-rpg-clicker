@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Idle RPG Clicker</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Idle RPG Clicker</h1>
+        <div class="stats">
+            <div>Gold: <span id="gold">0</span></div>
+            <div>Damage: <span id="damage">1</span></div>
+            <div>Auto Damage: <span id="autoDamage">0</span></div>
+        </div>
+        
+        <div class="health-bar">
+            <div class="health" id="health"></div>
+        </div>
+        <div class="monster" id="monster"></div>
+        
+        <div class="upgrades">
+            <div class="upgrade" id="damageUpgrade">
+                <h3>Increase Damage</h3>
+                <p>Cost: <span id="damageCost">10</span> gold</p>
+                <p>Level: <span id="damageLevel">1</span></p>
+            </div>
+            
+            <div class="upgrade" id="autoClicker">
+                <h3>Auto Clicker</h3>
+                <p>Cost: <span id="autoClickerCost">50</span> gold</p>
+                <p>Level: <span id="autoClickerLevel">0</span></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="index.js"></script>
+</body>
+</html>
