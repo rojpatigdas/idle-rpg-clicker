@@ -9,10 +9,17 @@ $(document).ready(function() {
     let damageLevel = 1;
     let autoClickerLevel = 0;
 
-    // Game loop
-    setInterval(() => {
-        attack(autoDamage);
-    }, 1000);
+    const monsters = [
+        { name: "Maddie", image: './assets/img/maddie.png' },
+        { name: "Ambessa", image: './assets/img/Ambessa.png' },
+        { name: "Finn", image: './assets/img/Finn.png' }
+    ];
+
+    function spawnNewMonster() {
+        const randomMonster = monsters[Math.floor(Math.random() * monsters.length)];
+        $('#monster').css('background-image', `url(${randomMonster.image})`);
+        $('#monsterName').text(randomMonster.name);
+    }
 
     function updateUI() {
         $('#gold').text(gold);
@@ -32,9 +39,15 @@ $(document).ready(function() {
             gold += Math.floor(maxMonsterHealth / 2);
             monsterHealth = maxMonsterHealth;
             maxMonsterHealth = Math.floor(maxMonsterHealth * 1.2);
+            spawnNewMonster();
         }
         updateUI();
     }
+
+    // Game loop
+    setInterval(() => {
+        attack(autoDamage);
+    }, 1000);
 
     $('#monster').click(() => {
         attack(damage);
@@ -60,5 +73,7 @@ $(document).ready(function() {
         }
     });
 
+    // Initialize first monster
+    spawnNewMonster();
     updateUI();
 });

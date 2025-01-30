@@ -17,10 +17,9 @@ body {
     margin: 20px auto;
     cursor: pointer;
     transition: transform 0.1s;
-    background-image: url('./assets/img/maddie.png');
     background-size: cover;
     background-position: center;
-    border-radius: 15%; /* Remove this if you don't want circular shape */
+    border-radius: 15%;
 }
 
 .monster:active {
@@ -67,14 +66,8 @@ body {
     transition: width 0.3s;
 }
 
-/* Optional monster state effects */
-.monster.hurt {
-    filter: brightness(1.2);
+.monster-name {
+    font-size: 24px;
+    margin: 10px 0;
+    text-transform: capitalize;
 }
-
-.monster.defeated {
-    filter: grayscale(1);
-    opacity: 0.7;
-}
-
-
