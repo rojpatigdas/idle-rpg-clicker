@@ -1,13 +1,17 @@
 $(document).ready(function() {
-    let gold = 0;
-    let damage = 1;
-    let autoDamage = 0;
-    let monsterHealth = 10;
-    let maxMonsterHealth = 10;
-    let damageUpgradeCost = 10;
-    let autoClickerCost = 50;
-    let damageLevel = 1;
-    let autoClickerLevel = 0;
+    // Game state
+    let gameState = {
+        gold: 0,
+        damage: 1,
+        autoDamage: 0,
+        monsterHealth: 10,
+        maxMonsterHealth: 10,
+        damageUpgradeCost: 10,
+        autoClickerCost: 50,
+        damageLevel: 1,
+        autoClickerLevel: 0,
+        currentMonster: null
+    };
 
     const monsters = [
         { name: "Maddie", image: './assets/img/maddie.png' },
@@ -15,65 +19,108 @@ $(document).ready(function() {
         { name: "Finn", image: './assets/img/Finn.png' }
     ];
 
+    // Save system
+    function saveGame() {
+        const saveData = {
+            ...gameState,
+            currentMonsterName: gameState.currentMonster.name
+        };
+        localStorage.setItem('rpgClickerSave', JSON.stringify(saveData));
+    }
+
+    function loadGame() {
+        const savedData = localStorage.getItem('rpgClickerSave');
+        if (savedData) {
+            const loadedData = JSON.parse(savedData);
+            
+            // Update game state
+            gameState = {
+                ...loadedData,
+                currentMonster: monsters.find(m => m.name === loadedData.currentMonsterName) || monsters[0]
+            };
+            
+            // Update monster display
+            $('#monster').css('background-image', `url(${gameState.currentMonster.image})`);
+            $('#monsterName').text(gameState.currentMonster.name);
+        }
+    }
+
     function spawnNewMonster() {
-        const randomMonster = monsters[Math.floor(Math.random() * monsters.length)];
-        $('#monster').css('background-image', `url(${randomMonster.image})`);
-        $('#monsterName').text(randomMonster.name);
+        gameState.currentMonster = monsters[Math.floor(Math.random() * monsters.length)];
+        $('#monster').css('background-image', `url(${gameState.currentMonster.image})`);
+        $('#monsterName').text(gameState.currentMonster.name);
     }
 
     function updateUI() {
-        $('#gold').text(gold);
-        $('#damage').text(damage);
-        $('#autoDamage').text(autoDamage);
-        $('#health').css('width', (monsterHealth / maxMonsterHealth * 100) + '%');
+        $('#gold').text(gameState.gold);
+        $('#damage').text(gameState.damage);
+        $('#autoDamage').text(gameState.autoDamage);
+        $('#health').css('width', (gameState.monsterHealth / gameState.maxMonsterHealth * 100) + '%');
         
-        $('#damageCost').text(damageUpgradeCost);
-        $('#damageLevel').text(damageLevel);
-        $('#autoClickerCost').text(autoClickerCost);
-        $('#autoClickerLevel').text(autoClickerLevel);
+        $('#damageCost').text(gameState.damageUpgradeCost);
+        $('#damageLevel').text(gameState.damageLevel);
+        $('#autoClickerCost').text(gameState.autoClickerCost);
+        $('#autoClickerLevel').text(gameState.autoClickerLevel);
     }
 
     function attack(amount) {
-        monsterHealth -= amount;
-        if (monsterHealth <= 0) {
-            gold += Math.floor(maxMonsterHealth / 2);
-            monsterHealth = maxMonsterHealth;
-            maxMonsterHealth = Math.floor(maxMonsterHealth * 1.2);
+        gameState.monsterHealth -= amount;
+        if (gameState.monsterHealth <= 0) {
+            gameState.gold += Math.floor(gameState.maxMonsterHealth / 2);
+            gameState.monsterHealth = gameState.maxMonsterHealth;
+            gameState.maxMonsterHealth = Math.floor(gameState.maxMonsterHealth * 1.2);
             spawnNewMonster();
         }
         updateUI();
+        saveGame();
     }
 
-    // Game loop
-    setInterval(() => {
-        attack(autoDamage);
-    }, 1000);
+    // Game systems
+    function setupEventListeners() {
+        $('#monster').click(() => attack(gameState.damage));
+        
+        $('#damageUpgrade').click(() => {
+            if (gameState.gold >= gameState.damageUpgradeCost) {
+                gameState.gold -= gameState.damageUpgradeCost;
+                gameState.damage += 2;
+                gameState.damageLevel++;
+                gameState.damageUpgradeCost = Math.floor(gameState.damageUpgradeCost * 1.5);
+                updateUI();
+                saveGame();
+            }
+        });
 
-    $('#monster').click(() => {
-        attack(damage);
-    });
+        $('#autoClicker').click(() => {
+            if (gameState.gold >= gameState.autoClickerCost) {
+                gameState.gold -= gameState.autoClickerCost;
+                gameState.autoDamage += 1;
+                gameState.autoClickerLevel++;
+                gameState.autoClickerCost = Math.floor(gameState.autoClickerCost * 2);
+                updateUI();
+                saveGame();
+            }
+        });
+    }
 
-    $('#damageUpgrade').click(() => {
-        if (gold >= damageUpgradeCost) {
-            gold -= damageUpgradeCost;
-            damage += 2;
-            damageLevel++;
-            damageUpgradeCost = Math.floor(damageUpgradeCost * 1.5);
-            updateUI();
+    // Initialize game
+    function init() {
+        loadGame();
+        if (!gameState.currentMonster) {
+            spawnNewMonster();
+        } else {
+            $('#monster').css('background-image', `url(${gameState.currentMonster.image})`);
+            $('#monsterName').text(gameState.currentMonster.name);
         }
-    });
+        
+        // Auto-save every 30 seconds
+        setInterval(saveGame, 30000);
+        
+        // Auto-attack loop
+        setInterval(() => attack(gameState.autoDamage), 1000);
+        
+        setupEventListeners();
+        updateUI();
+    }
 
-    $('#autoClicker').click(() => {
-        if (gold >= autoClickerCost) {
-            gold -= autoClickerCost;
-            autoDamage += 1;
-            autoClickerLevel++;
-            autoClickerCost = Math.floor(autoClickerCost * 2);
-            updateUI();
-        }
-    });
-
-    // Initialize first monster
-    spawnNewMonster();
-    updateUI();
+    init();
 });
